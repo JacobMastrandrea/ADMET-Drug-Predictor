@@ -29,9 +29,29 @@ def log_transform(df):
     return df
 
 
-def impute():
-    
-    return
+def impute(df):
+    """
+    Impute missing values if less than 50% are missing. If a column is missing more than 50% of values, it is dropped 
+    """
+
+    impute_cutoff = 0.50 #cutoff for acceptable percentage of missing values (50%)
+
+    for feature in df:
+        if df[feature].dtype == 'string' or df[feature].dtype == 'object': #these features aren't logical to impute (structural descriptors or modifiers)
+            continue
+
+        percent_missing = (df[feature].isna().sum()) / len(df[feature]) #calculate percentage of column values missing to compare with skip_impute
+        if percent_missing > impute_cutoff:
+            df.drop(columns = [feature], inplace=True) #drop the columns which have more than half of their values missing
+
+        #--- Determine imputation method based on skewness of data (if data is reasonably normally distributed -> mean, if its skewed -> median)
+        elif abs(df[feature].skew()) < 0.5:
+            df[feature] = df[feature].fillna(df[feature].mean())
+
+        elif abs(df[feature].skew()) > 0.5:
+            df[feature] =  df[feature].fillna(df[feature].median())
+
+    return df
 
 
 def preprocess():
