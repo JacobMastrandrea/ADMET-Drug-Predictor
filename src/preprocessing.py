@@ -16,9 +16,17 @@ def handle_invalid_negatives(df):
     return df
 
 
-def log_transform():
-    
-    return
+def log_transform(df):
+    """
+    Log transform the features which are highly skewed to achieve normal distributions 
+    """
+
+    skewed_features = ['HLM CLint', 'MLM CLint', 'Caco-2 Permeability Efflux']
+
+    for feature in skewed_features:
+        df[f'log_{feature}'] = df[feature].apply(lambda x: np.log(x)) #rename coloumns to preserve original columns
+
+    return df
 
 
 def impute():
