@@ -54,9 +54,33 @@ def impute(df):
     return df
 
 
-def preprocess():
-    
-    return
+def remove_collinear_features(df):
+    """
+    Return a list of collinear features if their correlation exceeds threshold value.
+    The user can then decide which feature to drop.
+    """
+    float_columns = df.select_dtypes(float) #use only the columns of floats
+    correlation_matrix = float_columns.corr() #compute correlation matrix of all features
+    upper_corr_matrix = correlation_matrix.where(np.triu(np.ones(correlation_matrix.shape), k=1).astype(bool)) #define the upper triangle of the correlation matrix to avoid redunancy
+    threshold = 0.85 #threshold chosen as a conservative value due to small dataset size
+    collinear_pairs = [] #define array to store pairs that are determined to be correlated
+
+    # --determine correlation loop
+    for col in upper_corr_matrix.columns: 
+        correlated = upper_corr_matrix[col][upper_corr_matrix[col] > threshold].index.tolist() #for every column in the upper trianlge, it is correlated if the correlation exceeds threshold
+        for feature in correlated: #loop over each correlated feature pairs to store them 
+            collinear_pairs.append((col,feature))
+
+    return collinear_pairs
+
+
+def preprocess(df):
+
+    df = handle_invalid_negatives(df)
+    df = log_transform(df)
+    df = impute(df)
+
+    return df
 
 if __name__ == '__main__':
     df = pd.read_csv("hf://datasets/openadmet/openadmet-expansionrx-challenge-train-data/expansion_data_train_raw.csv")
