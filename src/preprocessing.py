@@ -12,7 +12,8 @@ def handle_invalid_negatives(df):
                                  'MPPB','MBPB','MGMB']
 
     for feature in invalid_negative_features:
-        df[feature] = df[feature].apply(lambda x: x if x > 0 else np.nan)
+        if feature in df.columns:
+            df[feature] = df[feature].apply(lambda x: x if x > 0 else np.nan)
     return df
 
 
@@ -24,7 +25,8 @@ def log_transform(df):
     skewed_features = ['HLM CLint', 'MLM CLint', 'Caco-2 Permeability Efflux']
 
     for feature in skewed_features:
-        df[f'log_{feature}'] = df[feature].apply(lambda x: np.log(x)) #rename coloumns to preserve original columns
+        if feature in df.columns:
+            df[f'log_{feature}'] = df[feature].apply(lambda x: np.log(x)) #rename coloumns to preserve original columns
 
     return df
 
@@ -54,7 +56,7 @@ def impute(df):
     return df
 
 
-def remove_collinear_features(df):
+def return_collinear_features(df):
     """
     Return a list of collinear features if their correlation exceeds threshold value.
     The user can then decide which feature to drop.
