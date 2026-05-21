@@ -2,6 +2,29 @@ import pandas as pd
 import numpy as np
 
 
+
+def handle_censored_values(df):
+    """
+    Some values in the test dataset contain non-precise values, denoted with '<' or '>'. 
+    To handle these, the symbols will be dropped, and a new boolean column will be created to denote te original symbol, such to not lose any 
+    information or make assumptions
+    """
+
+    ignore_features = ['SMILES','Molecule Name', 'INCHIKEY']
+
+    for feature in df.columns:
+        if feature in ignore_features or 'modifier' in feature.lower():
+            continue
+        else:
+            df[f'{feature}_censored'] = df[feature].apply(
+                lambda x: 0 if isinstance(x,str) and '>'
+                else  1 if isinstance(x,str) and '<'
+                 else False
+                ) #First checks if '>' or '<' is in column, and creates a boolean columns if True
+            df[feature] = df[feature].apply(lambda x: float(x.replace('>', '').replace('<', '').strip()) if isinstance (x,str) else x) #Drops '<' or '>' 
+
+    return df
+
 def handle_invalid_negatives(df):
     """
     Replace zero and negative values with NaN for columns where 
@@ -77,7 +100,7 @@ def return_collinear_features(df):
 
 
 def preprocess(df):
-
+    df = handle_censored_values(df)
     df = handle_invalid_negatives(df)
     df = log_transform(df)
     df = impute(df)
@@ -85,7 +108,7 @@ def preprocess(df):
     return df
 
 if __name__ == '__main__':
-    df = pd.read_csv("hf://datasets/openadmet/openadmet-expansionrx-challenge-train-data/expansion_data_train_raw.csv")
+    df = pd.read_csv("data/raw/train_raw.csv") 
     df_clean = preprocess(df)
     print(df_clean.head())
     print(df_clean.shape)
