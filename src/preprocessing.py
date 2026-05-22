@@ -21,14 +21,14 @@ def handle_censored_values(df):
                 else  1 if isinstance(x,str) and '<'
                  else False
                 ) #First checks if '>' or '<' is in column, and creates a boolean columns if True
-            df[feature] = df[feature].apply(lambda x: float(x.replace('>', '').replace('<', '').strip()) if isinstance (x,str) else x) #Drops '<' or '>' 
+            df[feature] = df[feature].apply(lambda x: float(x.replace('>', '').replace('<', '').strip()) if isinstance(x,str) else x) #Drops '<' or '>' 
 
     return df
 
 def handle_invalid_negatives(df):
     """
     Replace zero and negative values with NaN for columns where 
-    these values are physically meaningless.
+    these values are physically meaningless.   
     """
 
     invalid_negative_features = ['KSOL','HLM CLint','MLM CLint',

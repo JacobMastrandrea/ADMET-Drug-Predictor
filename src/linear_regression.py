@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from sklearn.linear_model import LinearRegression
 from src.preprocessing import preprocess
 from sklearn.model_selection import cross_val_score, cross_val_predict
@@ -7,8 +8,10 @@ from sklearn.linear_model import Lasso
 from sklearn.metrics import mean_squared_error
 
 
-
-def train(df, target):
+def train_linear(df, target):
+    """
+    Linear regression Training Loop
+    """
 
     #-- Define features and target
     X = df.drop(columns=[target]).select_dtypes(include=['float64', 'int64'])
@@ -27,3 +30,15 @@ def train(df, target):
     y_pred_cv = cross_val_predict(fitted_model, X, y, cv=10)
 
     return fitted_model, scores, X, y, y_pred_cv
+
+
+def test_linear(df, target, model):
+    """
+    Testing Linear Regression Modles.
+    """
+    X =df.drop(columns=[target]).select_dtypes(include=['float64', 'int64'])
+
+    y_pred = model.predict(X)
+
+    return y_pred
+
