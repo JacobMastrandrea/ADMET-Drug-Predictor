@@ -1,5 +1,3 @@
-import numpy as np
-import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import cross_val_score, cross_val_predict
 
@@ -8,13 +6,13 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 
 
-def train_linear(df, target):
+def train_linear(df, target, features):
     """
     Linear regression Training Loop
     """
 
     #-- Define features and target
-    X = df.drop(columns=[target]).select_dtypes(include=['float64', 'int64'])
+    X = df[features]
     y = df[target]
 
     #-- Define instance of linear regression model
@@ -32,23 +30,23 @@ def train_linear(df, target):
     return fitted_model, scores, X, y, y_pred_cv
 
 
-def test_linear(df, target, model):
+def test_linear(df, features ,model):
     """
-    Testing Linear Regression Modles.
+    Testing Linear Regression Models.
     """
-    X =df.drop(columns=[target]).select_dtypes(include=['float64', 'int64']) #drop the target columns and only keep int64 and float64 dtypes
+    X  = df[features] #Use features to predict targets
 
     y_pred = model.predict(X) #predict the targets using the features (X)
 
     return y_pred
 
 
-def train_lasso(df, target):
+def train_lasso(df, target, features):
     """
     Training Lasso Lasso Models
     """
     #-- Define features and target
-    X = df.drop(columns=[target]).select_dtypes(include=['float64', 'int64'])
+    X = df[features]
     y = df[target]
 
     #-- A Pipeline is used here to ensure the scaler is fit only on training folds, preventing data leakage during cross val.
@@ -64,11 +62,11 @@ def train_lasso(df, target):
      
     return pipeline, scores, X, y, y_pred_cv
 
-def test_lasso(df, target, model):
+def test_lasso(df, features ,model):
     """
-    Testing Lasso Modles.
+    Testing Lasso Models.
     """
-    X =df.drop(columns=[target]).select_dtypes(include=['float64', 'int64']) #drop the target columns and only keep int64 and float64 dtypes
+    X =df[features] #Use features to predict targets
 
     y_pred = model.predict(X) #predict the targets using the features (X)
 

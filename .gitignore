@@ -212,3 +212,5 @@ __marimo__/
 # ==========================================
 data/raw/train_raw.csv
 data/raw/test_raw.csv
+data/clean/clean_train.csv
+data/raw/clean_test.csv

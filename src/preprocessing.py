@@ -1,5 +1,8 @@
 import pandas as pd
 import numpy as np
+from rdkit import Chem
+from rdkit.Chem import rdFingerprintGenerator
+from rdkit.Chem import Descriptors
 
 
 
@@ -50,7 +53,7 @@ def log_transform(df):
     for feature in skewed_features:
         if feature in df.columns:
             df[f'log_{feature}'] = df[feature].apply(lambda x: np.log(x)) #rename coloumns to preserve original columns
-
+            df = df.drop(columns=[feature]) #drop original feature to prevent data leakage
     return df
 
 
@@ -99,11 +102,41 @@ def return_collinear_features(df):
     return collinear_pairs
 
 
+def assign_molecular_features(df):
+    """
+    Calculate molecular properties from the SMILES string and assign them to new columns.
+    Properties: -Mol. Weight (g/mol)
+                -Hbonding Donors
+                -Hbonding Acceptors
+                -LogP
+                -Rotatable Bonds
+                Topological Polar Surface Area (TPSA)
+    """
+    mols = df['SMILES'].apply(Chem.MolFromSmiles) 
+
+    #-- Descriptors added as named columns
+    df['MolWt'] = mols.apply(Descriptors.MolWt)
+    df['TPSA'] = mols.apply(Descriptors.TPSA)
+    df['HBD'] = mols.apply(Descriptors.NumHDonors)
+    df['HBA'] = mols.apply(Descriptors.NumHAcceptors)
+    df['RotBonds'] = mols.apply(Descriptors.NumRotatableBonds)
+    df['LogP'] = mols.apply(Descriptors.MolLogP)
+
+    #-- Generate and assign Morgan Fingerprints
+    num_bits = 1024
+    generator = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=num_bits) #create Fingerprint generator
+    fps = mols.apply(lambda mol: np.array(generator.GetFingerprintAsNumPy(mol)))     #Apply generator to molecules
+    df_fps = pd.DataFrame(fps.tolist(), columns=[f'fps_{i}' for i in range(num_bits)], index=df.index)
+    df = pd.concat([df,df_fps],axis=1)
+    return df
+
+
 def preprocess(df):
     df = handle_censored_values(df)
     df = handle_invalid_negatives(df)
     df = log_transform(df)
     df = impute(df)
+    df = assign_molecular_features(df)
 
     return df
 
