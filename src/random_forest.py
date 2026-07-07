@@ -7,8 +7,9 @@ def train_random_forest(df, target):
     """
     A function to train a random forest model on the data passed through
     """
+    all_targets = ['KSOL','LogD', 'log_HLM CLint', 'log_MLM CLint']
     #-- Define features and target
-    X = df.drop(columns=[target]).select_dtypes(include=['float64', 'int64'])
+    X = df.drop(columns=all_targets).select_dtypes(include=['float64', 'int64'])
     y = df[target]
 
     #-- Define instance of random forest model
@@ -27,11 +28,13 @@ def train_random_forest(df, target):
 
 
 
-def test_random_forest(df, target, model):
+def test_random_forest(df, model):
     """
     Testing Random Forest Models.
     """
-    X =df.drop(columns=[target]).select_dtypes(include=['float64', 'int64']) #drop the target columns and only keep int64 and float64 dtypes
+    all_targets = ['KSOL','LogD', 'log_HLM CLint', 'log_MLM CLint']
+
+    X =df.drop(columns=all_targets).select_dtypes(include=['float64', 'int64']) #drop the target columns and only keep int64 and float64 dtypes
 
     y_pred = model.predict(X) #predict the targets using the features (X)
 
